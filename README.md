@@ -34,7 +34,7 @@ The Evidence Folder must contain one or more Exhibit Folders, whose names must b
 
 The following Exhibit Folder examples should help understand the functionality:
 
-| Name                                       | Result                                                       |
+| Folder Name                                | Result                                                       |
 | ------------------------------------------ | ------------------------------------------------------------ |
 | 101                                        | included                                                     |
 | 102 (Proof of Rent Payments)               | included with title                                          |

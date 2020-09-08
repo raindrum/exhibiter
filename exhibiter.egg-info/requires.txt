@@ -1,0 +1,5 @@
+img2pdf
+pdfrw
+texttable
+pypandoc
+pillow

@@ -3,11 +3,11 @@
 block_cipher = None
 
 
-a = Analysis(['exhibiter.py'],
+a = Analysis(['exhibiter/exhibiter.py'],
              binaries=[],
              datas=[('README.md','.'),
                     ('LICENSE.md','.'),
-                    ('assets','assets')],
+                    ('exhibiter/assets','assets')],
              hiddenimports=['pdfrw','texttable'],
              hookspath=[],
              runtime_hooks=[],
@@ -25,7 +25,6 @@ exe = EXE(pyz,
           a.datas,
           [],
           name='exhibiter',
-          icon='icon.ico',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
