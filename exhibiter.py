@@ -167,7 +167,7 @@ p.add_argument("-l", "--outlist",
     help="specify where to output exhibit list docx "+
          "(defaults to ./Defense Exhibit List.docx)",
     action="store")
-p.add_argument("-a", "--all",
+p.add_argument("-d", "--discovery-mode",
     help="don't omit files and folders marked "+
     "\"(UNUSED)\" or \"(EXCLUDE)\"",
     action="store_true")
@@ -223,7 +223,7 @@ else:
         "it yourself (see https://pandoc.org/installing.html), or "+
         "it can be installed automatically. Automatically install Pandoc?")
         if GUI:
-            MsgBox = messagebox.askquestion(installAsk)
+            MsgBox = messagebox.askquestion("Install Pandoc?",installAsk)
             if (MsgBox == 'yes'):
                 download_pandoc()
                 messagebox.showinfo("Installed Pandoc",
@@ -246,7 +246,7 @@ else:
                 makeList = False
 
 # whether to omit files marked (UNUSED) and (EXCLUDE)
-if args.all: includeAll = True
+if args.discovery_mode: includeAll = True
 elif GUI:
     MsgBox = messagebox.askquestion("Use Discovery Mode?",
         "Should the output include evidence that was marked "+
@@ -292,7 +292,7 @@ else:
 if tempFile.exists(): tempFile.unlink()
 
 # set default output folder for GUI
-if GUI: outFolder = inputFolder.parent
+if GUI: startFolder = inputFolder.parent
 
 # make Exhibit List (.docx file)
 if makeList:
@@ -301,21 +301,18 @@ if makeList:
     if args.outlist: outListPath = Path(args.outlist)
     elif GUI:
         outListPath = Path(filedialog.asksaveasfilename(
-            initialdir = outFolder,
-            initialfile = defaultName,
+            initialdir = startFolder,
+            initialfile = defaultName+'.docx',
             title = "Save exhibit list as...",
             filetypes = [("Word Document","*.docx")]))
-        outFolder = outListPath.parent
+        startFolder = outListPath.parent
     else: outListPath = Path.cwd() / (defaultName+".docx")
-    
     # set column justification
     t = exhList.draw().replace("+=","+:").replace("=+",":+",3)
-
     # make docx from markdown
     convert_text(listHeader + t,'docx','md',
-                 outputfile=outListPath.name,
+                 outputfile=str(outListPath),
                  extra_args=['--reference-doc='+refDoc])
-    
     print(" done.")
 
 # Make Exhibit File (.pdf file)
@@ -325,8 +322,8 @@ if not args.nopdf:
     if args.outpdf: outPdfPath = Path(args.outpdf)
     elif GUI:
         outPdfPath = Path(filedialog.asksaveasfilename(
-            initialdir = outFolder,
-            initialfile = defaultName,
+            initialdir = startFolder,
+            initialfile = defaultName+'.pdf',
             title = "Save evidence PDF as...",
             filetypes = [("PDF Document","*.pdf")]))
     else: outPdfPath = Path.cwd() / (defaultName+".pdf") 

@@ -14,9 +14,11 @@ When you first run the program, it will ask to install [Pandoc](https://pandoc.o
 
 ## Advanced
 
-Alternatively, if you have [Python 3.8](https://www.python.org/downloads/) or higher and you want the program in script form, just download `exhibiter.py` and the `assets` folder and place them in the same directory. Use Python to run `exhibiter.py`, and then install any missing modules with [pip](https://pypi.org/project/pip/). 
+When the program is installed by the method above, it can take a little while to launch. That's because it's a Python script that was packaged using [pyinstaller](https://pypi.org/project/pyinstaller/) to let people run it without having Python installed.
 
-If you need to compile a version that isn't in the Releases page, run [pyinstaller](https://pypi.org/project/pyinstaller/) on the included `exhibiter.spec`.
+You can avoid the startup lag you have [Python 3.8](https://www.python.org/downloads/) or higher and you want the program in script form, just download `exhibiter.py` and the `assets` folder and place them in the same directory. Use Python to run `exhibiter.py`, and then install any missing modules with [pip](https://pypi.org/project/pip/). 
+
+If you need to compile a version that isn't in the Releases page, run  using the included `exhibiter.spec`.
 
 # Usage
 
@@ -28,49 +30,45 @@ The Evidence Folder is the main folder that you want the program to process. It 
 
 ### 1.1. Put Exhibits in the Evidence Folder
 
-The Evidence Folder must contain one or more Exhibit Folders, whose names must be a number (corresponding to their exhibit number), plus optionally a title and an EXCLUDE flag, each of which should be in parentheses.
+The Evidence Folder must contain one or more Exhibit Folders, whose names must be a number, plus optionally a title and/or an `UNUSED` tag in parentheses. Non-folders, and folders that don't begin with numbers, will be omitted.
 
-- Exhibit numbers must be between 1 and 200.[^1]
-- If present, the title will be added at the beginning of the Exhibit's description in the Exhibit List.[^2]
-- If the EXCLUDE flag is present, then the exhibit will be omitted unless the program is launched from a command line with the `-a` or `--all` option.[^3]
+The following Exhibit Folder examples should help understand the functionality:
 
-An example Evidence Folder might contain a set of Exhibit Folders with the following names:
+| Name                                       | Result                                                       |
+| ------------------------------------------ | ------------------------------------------------------------ |
+| 101                                        | included                                                     |
+| 102 (Proof of Rent Payments)               | included with title                                          |
+| 103 (UNUSED)                               | excluded except in Discovery mode. "(EXCLUDE)" has the same effect |
+| 104 (Photographs of the Interior) (UNUSED) | same as above, but with title                                |
+| Notes                                      | excluded because name does not begin with a number           |
+| 105.pdf                                    | excluded because it is not a folder                          |
 
-> - **101**
-> - **102**
-> - **103 (Written Communication Between the Parties)**
-> - **104 (Photographs of the Interior) (EXCLUDE)**
-> - **105 (EXCLUDE)**
+You should not provide titles for Exhibits that contain only one Document, because in that case the Document name would make the title redundant.
 
-### 1.2. Put Documents in each Exhibit
+Also note that exhibits with numbers over 200 will not work properly. If, for whatever reason, you need more than 200 exhibits, add more pages to the included `assets/cover_pages.pdf`.
+
+### 1.2. Put Documents in each Exhibit Folder
 
 Each Exhibit Folder must contain one or more Documents, which will be arranged alphabetically. A Document can be one of three things:
 
 1. a PDF,
 2. an image file (specifically .png, .jpg, or .jpeg), or
-3. a folder full of image files.
+3. a folder full of image files, which will be put together in alphabetical order
 
-Every Document has a name that will appear in the Exhibit List. The name is determined based on the Document's file name.[^4] The program reads a file name and performs several steps in processing it:
+Anything else in an Exhibit folder will be ignored, except `evidentiary disputes.txt`. If this file is present, its contents will be written into the Evidentiary Disputes column of the exhibit list.
 
-1. If the Document's name contains an EXCLUDE tag (in parentheses), the document will be omitted unless the program is run with the `-a` or `--all` option.
-2. If the Document's name begins with a number followed by a period and a space (e.g. "01. Welcome Note.pdf"), that part will be omitted. This is so you can use numbers to manually organize the files if the automatic organizing is not ideal.[^5]
-3. If the Document's name begins with a date in YYYY-MM-DD format (e.g. 1995-01-09), this will be moved to the end of the name in M/D/YY format. It is recommended that you use YYYY-MM-DD date format for every Document that has a relevant date.[^6]
+#### Rules for Document Names
 
-Some Exhibits may have evidentiary issues, like being admissible only for certain purposes, which should be noted in the Exhibit List. You can make these notes by creating a text file called `evidentiary disputes.txt` in the relevant Exhibit Folder. If this file is present, its contents will be written into the Evidentiary Disputes column of the Exhibit List.
+1. Inside each Exhibit, the program arranges Documents alphabetically based on their filenames. Here's how to make the best use of this:
+   - For chronological order, start the filename with a date in YYYY-MM-DD format, followed by a space. E.g. `2020-01-09 Welcome Note.pdf`. This will be detected and displayed in the Exhibit List as "Welcome Note 1/9/20."
+   - For other ordering, begin the filename with any number of digits, followed by a period and a space. E.g. `01. Welcome Note`. The number will be hidden in the exhibit list. To preserve these numbers, you can run the program from a command line with the `-k` or `--keep-digits` option.
+2. If a filename contains `(UNUSED)` or `(EXCLUDE)`, the Document will be omitted except in Discovery mode.
+3. Filenames are processed to create a line in the Exhibit List for the document.
 
-An example Exhibit Folder might contain the following set of Documents:
-
-> - **2020-01-03 **
+Note that for Documents that are themselves folders of images, the relevant filename is the name of the folder, *not* the images inside. The images will be arranged alphabetically, and their names are otherwise ignored.
 
 ### 2. Run the Program
 
-If you installed a compiled version of the program, you should be able to run it by double-clicking it. The  program will then walk you through the process. On some platforms, you can also launch the program by dragging an Evidence Folder onto it.
+If you installed a compiled version of the program, you should be able to run it by double-clicking it. On some platforms, you can also launch the program by dragging an Evidence Folder onto it. You will be asked whether to use Discovery Mode, i.e. whether the output should include even the evidence marked `(UNUSED)`.
 
 Alternatively, the program also be run from a command line, where it is possible to specify various advanced options. These features are documented in the program itself, and can be accessed by running it with the `-h` option.
-
-[^1]: If you need more exhibits than this, or want to customize the appearance of the cover sheets, you will need to modify ```assets/cover_pages.pdf```, included inside the program.
-[^2]:  I don't recommend providing titles for Exhibits that contain only one Document, because in that case the Document name makes a title redundant.
-[^3]:  The EXCLUDE flag is intended for indicating files that will not be presented at trial, but which must be included in discovery responses.
-[^4]: Note that if a Document is a folder of images rather than a single file, the document name comes from the name of the folder. The images inside will be arranged in alphabetical order, and their file names will otherwise be ignored.
-[^5]: To prevent the program from stripping these digits, you can run it from a command line with the `-k` or `--keep-digits` option enabled.
-[^6]:  YYYY-MM-DD dates are useful because the program arranges documents alphabetically, and in this format chronological and alphabetical order are identical. Do not omit leading zeros; January 9, 1995 should be written as 1995-01-09.
