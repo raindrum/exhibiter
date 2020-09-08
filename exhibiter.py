@@ -12,7 +12,7 @@
 #    counsel.
 # For more info, see README.md.
 #
-# (C) 2020 Simon Raindrum Sherred ™
+# Copyright 2020 Simon Raindrum Sherred
 
 import os
 import sys
@@ -113,8 +113,10 @@ class Document:
         
         # add whatever file(s) the doc includes
         if path.is_dir():
-            for imagePath in sorted(self.path.iterdir()):
-                self.add_file(imagePath)
+            for ipath in sorted(self.path.iterdir()):
+                if search(omitPattern, ipath.name) and not includeAll: continue
+                if not search(".pdf$|.png$|.jpg$|.jpeg$", ipath.name): continue
+                self.add_file(ipath)
         else: self.add_file(path)
         
         # if doc contains > 1 page, include pagecount
@@ -122,15 +124,12 @@ class Document:
             self.name += " (" + str(self.pagecount) + ")"
         
     def add_file(self, path):
-        if search(omitPattern, path.name) and not includeAll:
-            return
         if search(".pdf$", path.name):
             filePdf = PdfReader(path)
         else:
             img = Image.open(path)
-            pdf_bytes = img2pdf.convert(
-                img.filename,
-                layout_fun=img2pdfLayout)
+            pdf_bytes = img2pdf.convert(img.filename,
+                                        layout_fun=img2pdfLayout)
             temp = open(tempFile, "wb")
             temp.write(pdf_bytes)
             img.close()
@@ -202,11 +201,26 @@ args = p.parse_args()
 if args.force_gui or not args.inputfolder: GUI = True
 if GUI: Tk().withdraw()
 
-# Open GUI if 
+# Select input folder
 if args.inputfolder: inputFolder = Path(args.inputfolder)
 else:
-    inputFolder = Path(filedialog.askdirectory(
-        title="Select Evidence Folder"))
+    print("Please select an input folder.")
+    pick = filedialog.askdirectory(title="Select Evidence Folder")
+    if pick: inputFolder = Path(pick)
+    else: sys.exit()
+
+# Check if input folder is valid
+validInput = False
+for folder in inputFolder.iterdir():
+    if search("\d+( \(.+\))?", folder.name): validInput = True
+if not validInput:
+    error = ("This directory doesn't seem to have any Exhibit "+
+            "Folders in it. Exhibit folder names must be a number, "+
+            "optionally followed by a title in parentheses, e.g. "+
+            "\"101 (Rental Agreement)\"")
+    if GUI: messagebox.showwarning("Invalid input folder", error)
+    else: print(error)
+    sys.exit()
 
 # setup PDF writer to combine PDF pages
 if not args.nopdf: outPdfWriter = PdfWriter()
@@ -230,10 +244,9 @@ else:
                     "Pandoc has been installed to\n"+
                     get_pandoc_path())
             else:
-                messagebox.showwarning(
-               	    "Proceeding without Pandoc",
-                    "Since Pandoc is not installed, no "+
-                    "Exhibit List will be created this time.")
+                messagebox.showwarning("Proceeding without Pandoc",
+                                       "Since Pandoc is not installed, no "+
+                                       "Exhibit List will be created.")
                 makeList = False
         else:
             print(installAsk, end='')
@@ -269,9 +282,11 @@ exhList.header(['**No. **','**ID**','**EV**',
 
 # process all subfolders in alphabetical order
 for exhibitPath in sorted(inputFolder.iterdir()):
-    if (not exhibitPath.is_dir() or
-        not search("\d+( \(.+\))?", exhibitPath.name) or
-        (search(omitPattern, exhibitPath.name) and not includeAll)): continue
+    # skip nonfolders, folders without exhibit numbers, and omitted folders
+    if not exhibitPath.is_dir(): continue
+    if not search("\d+( \(.+\))?", exhibitPath.name): continue
+    if search(omitPattern, exhibitPath.name) and not includeAll: continue
+    
     exhibit = Exhibit(exhibitPath)
     print("\nExhibit " + exhibit.name)
     for documentPath in sorted(exhibit.path.iterdir()):
