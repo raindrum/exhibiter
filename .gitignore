@@ -1,1 +1,5 @@
+exhibiter.spec
+exhibiter.egg-info/
 build/
+dist/exhibiter
+dist/exhibiter.exe

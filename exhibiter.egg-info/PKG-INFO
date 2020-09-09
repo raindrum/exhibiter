@@ -1,12 +1,14 @@
 Metadata-Version: 2.1
 Name: exhibiter
-Version: 1.0
+Version: 1.0.0
 Summary: a tool to organize evidence for litigation
 Home-page: https://github.com/raindrum/exhibiter
 Author: Simon Raindrum Sherred
 Author-email: simonraindrum@gmail.com
-License: UNKNOWN
-Description: This is a tool to help organize evidence for litigation. If you keep your evidence as named pdf, jpg, and png files in numbered exhibit folders, the program can automatically generate an exhibit list and PDF suitable for jury documents and discovery responses.
+License: Non-Eviction
+Description: ![icon](icon.svg)
+        
+        This is a tool to help organize evidence for litigation. If you keep your evidence as named pdf, jpg, and png files in numbered exhibit folders, the program can automatically generate an exhibit list and PDF suitable for jury documents and discovery responses.
         
         I made this tool in the hopes that it would make eviction defense a little easier. Plaintiffs may use it as well, but *eviction plaintiffs* and their representatives may not. 
         
@@ -14,19 +16,15 @@ Description: This is a tool to help organize evidence for litigation. If you kee
         
         # Installation
         
-        ## Easy
+        This package requires Python 3.8 or higher to run. If you do not have Python, follow [this link](https://www.python.org/downloads/) to install it. If you use Windows, make sure to select the options to add Python to your PATH, and to disable the 260-character path limit.
         
-        Go to the Releases page and download the version for your operating system. Save it wherever it will be convenient for you to access.
+        Once you have Python, you should be able to install the program by running the following command:
         
-        When you first run the program, it will ask to install [Pandoc](https://pandoc.org/) if it is not already installed.
+        ```
+        pip install https://github.com/raindrum/exhibiter/raw/master/dist/exhibiter-1.0.tar.gz
+        ```
         
-        ## Advanced
-        
-        When the program is installed by the method above, it can take a little while to launch. That's because it's a Python script that was packaged using [pyinstaller](https://pypi.org/project/pyinstaller/) to let people run it without having Python installed.
-        
-        You can avoid the startup lag you have [Python 3.8](https://www.python.org/downloads/) or higher and you want the program in script form, just download `exhibiter.py` and the `assets` folder and place them in the same directory. Use Python to run `exhibiter.py`, and then install any missing modules with [pip](https://pypi.org/project/pip/). 
-        
-        If you need to compile a version that isn't in the Releases page, run  using the included `exhibiter.spec`.
+        I'm planning to upload the program to [PyPi.org](https://pypi.org/) soon so that you can install it with `pip install exhibiter`, but I haven't yet.
         
         # Usage
         
@@ -61,7 +59,7 @@ Description: This is a tool to help organize evidence for litigation. If you kee
         
         1. a PDF,
         2. an image file (specifically .png, .jpg, or .jpeg), or
-        3. a folder full of image files, which will be put together in alphabetical order
+        3. a folder full of image files, in which case the Document will contain all of them in alphabetical order.
         
         Anything else in an Exhibit folder will be ignored, except `evidentiary disputes.txt`. If this file is present, its contents will be written into the Evidentiary Disputes column of the exhibit list.
         
@@ -75,14 +73,13 @@ Description: This is a tool to help organize evidence for litigation. If you kee
         
         Note that for Documents that are themselves folders of images, the relevant filename is the name of the folder, *not* the images inside. The images will be arranged alphabetically, and their names are otherwise ignored.
         
-        ### 2. Run the Program
+        ## 2. Run the Program
         
-        If you installed a compiled version of the program, you should be able to run it by double-clicking it. On some platforms, you can also launch the program by dragging an Evidence Folder onto it. You will be asked whether to use Discovery Mode, i.e. whether the output should include even the evidence marked `(UNUSED)`.
+        Open a command line and type `exhibiter`, then press Enter, to see the options for running the program from a command line. Fundamentally, the program depends on specifying the path to an input folder, by typing `exhibiter FOLDERNAME`.
         
-        Alternatively, the program also be run from a command line, where it is possible to specify various advanced options. These features are documented in the program itself, and can be accessed by running it with the `-h` option.
-        
+        You can also type `exhibiter -g` to use the program in graphical mode. Note that this mode does not include the advanced options available in command-line mode.
 Platform: UNKNOWN
 Classifier: Programming Language :: Python :: 3
-Classifier: License :: DON'T EVICT
+Classifier: License :: Non-Eviction
 Classifier: Operating System :: OS Independent
 Description-Content-Type: text/markdown

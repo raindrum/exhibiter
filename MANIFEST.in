@@ -1,1 +1,5 @@
 graft exhibiter/assets
+include icon.svg
+include LICENSE.md
+include README.md
+include icon.svg

@@ -1,19 +1,25 @@
 import setuptools
 
-with open("README.md", "r") as fh:
+with open('README.md', 'r') as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="exhibiter",
-    version="1.0",
-    description="a tool to organize evidence for litigation",
-    author="Simon Raindrum Sherred",
-    author_email="simonraindrum@gmail.com",
+    name='exhibiter',
+    version='1.0.0',
+    description='a tool to organize evidence for litigation',
+    author='Simon Raindrum Sherred',
+    author_email='simonraindrum@gmail.com',
+    license="Non-Eviction",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/raindrum/exhibiter",
+    url='https://github.com/raindrum/exhibiter',
     packages=setuptools.find_packages(),
-    scripts=['exhibiter/exhibiter.py'],
+    entry_points={
+        "console_scripts": [
+            "exhibiter = exhibiter.exhibiter:main",
+        ]
+    },
+    include_package_data=True,
     install_requires=[
         'img2pdf',
         'pdfrw',
@@ -22,9 +28,9 @@ setuptools.setup(
         'pillow',
     ],
     classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: DON'T EVICT",
-        "Operating System :: OS Independent",
+        'Programming Language :: Python :: 3',
+        'License :: Non-Eviction',
+        'Operating System :: OS Independent',
     ],
     python_require='>=3.8',
 )
