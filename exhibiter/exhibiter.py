@@ -250,13 +250,14 @@ def main():
                                            "Exhibit List will be created.")
                     makeList = False
             else:
+                print("this shit's about to get WILD")
                 print(installAsk, end='')
-                if input(" [y/N]: " == 'y'):
+                if input(" [y/N]: ") == 'y':
                     download_pandoc()
                     print("Done installing Pandoc.")
                 else:
                     print("Since you didn't type \"y\" to install Pandoc, "+
-                          "no Exhibit List will be created this time.")
+                          "no Exhibit List will be created.")
                     makeList = False
     
     # whether to omit files marked (UNUSED) and (EXCLUDE)

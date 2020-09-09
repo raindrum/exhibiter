@@ -1,4 +1,5 @@
 exhibiter.spec
+*.sh
 exhibiter.egg-info/
 build/
 dist/exhibiter
