@@ -13,7 +13,7 @@ This package requires Python 3.8 or higher to run. If you do not have Python, fo
 Once you have Python, you should be able to install the program by running the following command:
 
 ```
-pip install https://github.com/raindrum/exhibiter/raw/master/dist/exhibiter-1.0.tar.gz
+pip install https://github.com/raindrum/exhibiter/raw/master/dist/exhibiter-1.0.0.tar.gz
 ```
 
 I'm planning to upload the program to [PyPi.org](https://pypi.org/) soon so that you can install it with `pip install exhibiter`, but I haven't yet.
