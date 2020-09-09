@@ -250,7 +250,6 @@ def main():
                                            "Exhibit List will be created.")
                     makeList = False
             else:
-                print("this shit's about to get WILD")
                 print(installAsk, end='')
                 if input(" [y/N]: ") == 'y':
                     download_pandoc()

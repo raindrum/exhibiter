@@ -16,7 +16,7 @@ Once you have Python, you should be able to install the program by running the f
 pip install https://github.com/raindrum/exhibiter/raw/master/dist/exhibiter-1.0.0.tar.gz
 ```
 
-I'm planning to upload the program to [PyPi.org](https://pypi.org/) soon so that you can install it with `pip install exhibiter`, but I haven't yet.
+The program also requires [Pandoc](https://pandoc.org/), a free and open-source document converter.  It can usually install Pandoc automatically with your permission, but if this fails you will need to install it by following [the directions on their website](https://pandoc.org/installing.html).
 
 # Usage
 

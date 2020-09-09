@@ -1,5 +1,8 @@
 exhibiter.spec
 *.sh
+*.deb
+*.docx
+*.pdf
 exhibiter.egg-info/
 build/
 dist/exhibiter
