@@ -164,7 +164,7 @@ def main():
     p.add_argument("-g", "--gui",
         help="use graphical interface for selecting input "+
              "and output. Presents few options visually, but "+
-             "can be combined with other command-line options"
+             "can be combined with other command-line options",
         action="store_true")
     p.add_argument("-L", "--nolist",
         help="don't create an exhibit list",
