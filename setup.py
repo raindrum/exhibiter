@@ -17,10 +17,10 @@ setuptools.setup(
     entry_points={
         "console_scripts": [
             "exhibiter = exhibiter.exhibiter:cli_launch",
-        ],
-        "gui_scripts": [
-        	"Exhibiter = exhibiter.exhibiter:gui_launch",
-        ]
+        ]#,
+        #"gui_scripts": [
+        #	"Exhibiter = exhibiter.exhibiter:gui_launch",
+        #]
     },
     include_package_data=True,
     install_requires=[
