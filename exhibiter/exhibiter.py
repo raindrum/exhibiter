@@ -19,6 +19,7 @@ from pikepdf import _cpphelpers
 # -------------------------------------------------------
 # Main Program
 # -------------------------------------------------------
+
 def main():
     # perform setup
     if args.gui: Tk().withdraw() # hide blank window
@@ -111,6 +112,9 @@ def getInputFolder():
         else: print(error)
         sys.exit()
 
+# -------------------------------------------------------
+# Classes
+# -------------------------------------------------------
 
 class ExhibitList:
     def __init__(self):
@@ -189,7 +193,7 @@ class Document:
             for x in sorted(path.iterdir()):
                 if is_page(x): self.include(x)
         else: self.include(path)
-    
+
     def __str__(self):
         return self.name
     
@@ -309,18 +313,21 @@ def gui_launch():
 def is_exhibit(path):
     if not path.is_dir(): return False
     elif not search("\d+( \(.+\))?", path.name): return False
-    elif (not args.discovery_mode and
-        search(omitPattern, path.name)): return False
+    elif (not args.discovery_mode and search(omitPattern, path.name)):
+        return False
     else: return True
 
 def is_document(path):
-    if search(omitPattern, path.name): return False
-    if (not path.is_dir() and
+    if (not args.discovery_mode and search(omitPattern, path.name)):
+        return False
+    elif (not path.is_dir() and
     not search(".pdf$|.png$|.jpg$|.jpeg$", path.name)):
         return False
     else: return True
     
 def is_page(path):
+    if (not args.discovery_mode and search(omitPattern, path.name)):
+        return False
     if not search(".pdf$|.png$|.jpg$|.jpeg$", path.name):
         return False
     elif (not args.discovery_mode and
