@@ -13,7 +13,7 @@ This package requires Python 3.8 or higher to run. If you do not have Python, fo
 Once you have Python, you should be able to install the program by running the following command:
 
 ```
-pip install https://github.com/raindrum/exhibiter/raw/master/dist/exhibiter-1.0.0.tar.gz
+pip install https://github.com/raindrum/exhibiter/raw/master/dist/exhibiter-0.5.0.tar.gz
 ```
 
 The program also requires [Pandoc](https://pandoc.org/), a free and open-source document converter.  It can usually install Pandoc automatically with your permission, but if this fails you will need to install it by following [the directions on their website](https://pandoc.org/installing.html).

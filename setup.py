@@ -5,7 +5,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name='exhibiter',
-    version='1.0.0',
+    version='0.5.0',
     description='a tool to organize evidence for litigation',
     author='Simon Raindrum Sherred',
     author_email='simonraindrum@gmail.com',
@@ -16,7 +16,10 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     entry_points={
         "console_scripts": [
-            "exhibiter = exhibiter.exhibiter:main",
+            "exhibiter = exhibiter.exhibiter:cli_launch",
+        ],
+        "gui_scripts": [
+        	"Exhibiter = exhibiter.exhibiter:gui_launch",
         ]
     },
     include_package_data=True,
