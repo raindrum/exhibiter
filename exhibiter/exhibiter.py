@@ -17,6 +17,81 @@ from tkinter.messagebox import showwarning, askquestion, showinfo
 from pikepdf import _cpphelpers
 
 # -------------------------------------------------------
+# Launcher
+# -------------------------------------------------------
+
+def cli_launch():
+    global args, parser
+    parser = ArgumentParser(
+        description="This is a tool to help arrange "+
+        "evidence for trial documents and discovery "+
+        "responses. Before using it, you must organize "+
+        "the input folder in a specific way. For more "+
+        "info, see https://github.com/raindrum/exhibiter.")
+    parser.add_argument(
+        "inputfolder",
+        help="the root folder containing all exhibits. "+
+             "This MUST be included except in GUI mode",
+        action="store",
+        nargs='?')
+    parser.add_argument(
+        "-g", "--gui",
+        help="use graphical interface to select input and "+
+        "outputs, and whether to use discovery mode. "+
+        "Does not present other options visually, but they "+
+        "can be specified in the command along with -g",
+        action="store_true")
+    parser.add_argument(
+        "-d", "--discovery-mode",
+        help="don't omit files and folders marked "+
+        "\"(UNUSED)\" or \"(EXCLUDE)\". These tags will "+
+        "not be displayed in the exhibit list",
+        action="store_true")
+    parser.add_argument(
+        "-o", "--outpdf",
+        help="specify where to output exhibits pdf "+
+             "(defaults to ./Defense Exhibits.pdf)",
+        action="store")
+    parser.add_argument(
+        "-l", "--outlist",
+        help="specify where to output exhibit list docx "+
+             "(defaults to ./Defense Exhibit List.docx)",
+        action="store")
+    parser.add_argument(
+        "-p", "--plaintiff",
+        help="label as plaintiff list instead of defense",
+        action="store_true")
+    parser.add_argument(
+        "-k", "--keep-digits",
+        help="don't remove leading digits from document names",
+        action="store_true")
+    parser.add_argument(
+        "--nolist",
+        help="don't create an exhibit list",
+        action="store_true")
+    parser.add_argument(
+        "--nopdf",
+        help="don't create a pdf of evidence",
+        action="store_true")
+    parser.add_argument(
+        "--no-page-counts",
+        help="don't append page counts to the "+
+             "names of multi-page documents",
+        action="store_true")
+    parser.add_argument(
+        "--no-rebuttal",
+        help="don't reserve an additional "+
+             "exhibit for rebuttal",
+        action="store_true")
+    parser.add_argument("--attachno",
+        help="specify the attachment number for "+
+             "the exhibit list (defaults to 4)",
+        action="store",
+        default="4")
+    args = parser.parse_args()
+    main()
+
+# -------------------------------------------------------
 # Main Program
 # -------------------------------------------------------
 
@@ -45,7 +120,7 @@ def main():
             exhibit.include(document)
         outList.include(exhibit)
     
-    if not args.norebuttal: outList.reserve_rebuttal()
+    if not args.no_rebuttal: outList.reserve_rebuttal()
     
     if tempFile.exists(): tempFile.unlink()
     
@@ -87,12 +162,12 @@ def getInputFolder():
     if args.inputfolder: inputFolder = Path(args.inputfolder)
     elif args.gui:
         print("Please select an input folder.")
-        userPick = askdirectory(title="Select Evidence Folder")
+        userPick = askdirectoruply(title="Select Evidence Folder")
         if userPick: inputFolder = Path(userPick)
         else: sys.exit()
     else:
-        print("You must provide an input folder "+
-              "or else use GUI mode (-g).")
+        print("\nError: You must specify an input "+
+              "folder or else use GUI mode (-g).\n")
         parser.print_help()
         sys.exit()    
     # Check if input folder is valid
@@ -103,7 +178,7 @@ def getInputFolder():
     else:
         error = (
             "This directory doesn't seem to have any "+
-            "Exhibit Folders in it. Exhibit folder names +"
+            "Exhibit Folders in it. Exhibit folder names "+
             "must be a number, optionally followed by a "+
             "title in parentheses. E.g. \"101 (Rental "+
             "Agreement)\""
@@ -226,85 +301,11 @@ class Document:
         self.pagecount += len(newPages)
     
     def list_line(self):
-        if self.pagecount > 1:
-            return self.name + " (" + str(self.pagecount) + ")"
-        else: return self.name
-        
+        if args.no_page_counts or self.pagecount <= 1:
+            return self.name
+        else: 
+            return self.name + " ("+str(self.pagecount)+")"
 
-# -------------------------------------------------------
-# Launchers
-# -------------------------------------------------------
-
-def cli_launch():
-    global args, parser
-    parser = ArgumentParser(description=
-    """This is a script to help arrange evidence for trial docs
-    and discovery. Before running it, you must organize the input
-    folder in a specific way. See README.md for more info.""")
-    parser.add_argument("inputfolder",
-        help="the root folder containing all exhibits. "+
-             "This MUST be included except in GUI mode.",
-        action="store",
-        nargs='?')
-    parser.add_argument("-g", "--gui",
-        help="use graphical interface for selecting input "+
-             "and output. Presents few options visually, but "+
-             "can be combined with other command-line options",
-        action="store_true")
-    parser.add_argument("-d", "--discovery-mode",
-        help="don't omit files and folders marked "+
-        "\"(UNUSED)\" or \"(EXCLUDE)\"",
-        action="store_true")
-    parser.add_argument("-o", "--outpdf",
-        help="specify where to output Exhibits pdf "+
-             "(defaults to ./Defense Exhibits.pdf)",
-        action="store")
-    parser.add_argument("-l", "--outlist",
-        help="specify where to output Exhibit List docx "+
-             "(defaults to ./Defense Exhibit List.docx)",
-        action="store")
-    parser.add_argument("-p", "--plaintiff",
-        help="label as plaintiff list instead of defense",
-        action="store_true")
-    parser.add_argument("-k", "--keep-digits",
-        help="don't remove leading digits from document names",
-        action="store_true")
-    parser.add_argument("--nolist",
-        help="don't create an exhibit list",
-        action="store_true")
-    parser.add_argument("--nopdf",
-        help="don't create a pdf of evidence",
-        action="store_true")
-    parser.add_argument("--norebuttal",
-        help="don't reserve an additional exhibit for rebuttal",
-        action="store_true")
-    parser.add_argument("--attachno",
-        help="specify the attachment number of the exhibit list"+ 
-             "(defaults to 4)",
-        action="store",
-        default="4")
-    args = parser.parse_args()
-    main()
-
-
-def gui_launch():
-    global args, parser
-    parser = ArgumentParser()
-    parser.set_defaults(
-        gui=True,
-        attachno='4',
-        inputfolder='',
-        outpdf='',
-        outlist='',
-        discovery_mode=False,
-        nolist=False,
-        nopdf=False,
-        norebuttal=False,
-        plaintiff=False,
-        keep_digits=False
-    )
-    args = parser.parse_args()
-    main()
 
 # -------------------------------------------------------
 # Sanity Checks
@@ -401,6 +402,7 @@ def setup_pandoc():
                 download_pandoc()
                 print("Done installing Pandoc.")
             else:
-                print("Since you didn't type \"y\" to install Pandoc, "+
-                      "no Exhibit List will be created.")
+                print("Since you didn't type \"y\" to "+
+                "install Pandoc, no Exhibit List will be "+
+                "created.")
                 args.nolist = True

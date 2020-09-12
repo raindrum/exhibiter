@@ -1,9 +1,7 @@
-exhibiter.spec
+*.spec
 *.sh
 *.deb
 *.docx
 *.pdf
-exhibiter.egg-info/
+*.egg-info/
 build/
-dist/exhibiter
-dist/exhibiter.exe

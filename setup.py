@@ -5,7 +5,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name='exhibiter',
-    version='0.5.0',
+    version='0.9.0',
     description='a tool to organize evidence for litigation',
     author='Simon Raindrum Sherred',
     author_email='simonraindrum@gmail.com',
@@ -17,10 +17,7 @@ setuptools.setup(
     entry_points={
         "console_scripts": [
             "exhibiter = exhibiter.exhibiter:cli_launch",
-        ]#,
-        #"gui_scripts": [
-        #	"Exhibiter = exhibiter.exhibiter:gui_launch",
-        #]
+        ]
     },
     include_package_data=True,
     install_requires=[
@@ -31,8 +28,12 @@ setuptools.setup(
         'pillow',
     ],
     classifiers=[
-        'Programming Language :: Python :: 3',
-        'License :: Non-Eviction',
+        'License :: Free To Use But Restricted',
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Legal Industry',
+        'Programming Language :: Python :: 3.8',
+        'Environment :: Console',
+        'Environment :: Other Environment',
         'Operating System :: OS Independent',
     ],
     python_require='>=3.8',
