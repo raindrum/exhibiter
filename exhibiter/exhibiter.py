@@ -1,20 +1,22 @@
 # exhibiter - a Python program for arranging evidence
 # copyright 2020 Simon Raindrum Sherred
 
+# python3 standard imports
 import os
 import sys
-import img2pdf
-import texttable
 from pathlib import Path
 from argparse import ArgumentParser
 from re import search, sub
-from pdfrw import PdfReader, PdfWriter
-from pypandoc import get_pandoc_path, download_pandoc, convert_text
-from PIL import Image
 from tkinter import Tk
 from tkinter.filedialog import askdirectory, asksaveasfilename
 from tkinter.messagebox import showwarning, askquestion, showinfo
-from pikepdf import _cpphelpers
+
+# third-party imports
+import img2pdf
+import texttable
+from pdfrw import PdfReader, PdfWriter
+from pypandoc import get_pandoc_path, download_pandoc, convert_text
+from PIL import Image
 
 # -------------------------------------------------------
 # Launcher
@@ -251,11 +253,7 @@ class Exhibit:
         self.description += document.list_line()
     
     def listRow(self): 
-        return [self.number,
-                "X",
-                "",
-                self.description,
-                self.disputes]
+        return [self.number,"X","",self.description,self.disputes]
 
 
 class Document:
@@ -301,6 +299,7 @@ class Document:
         self.pagecount += len(newPages)
     
     def list_line(self):
+        
         if args.no_page_counts or self.pagecount <= 1:
             return self.name
         else: 

@@ -8,7 +8,7 @@ Copyright 2020 Simon Raindrum Sherred.
 
 # Installation
 
-Exhibiter requires Python 3.8 or higher to run. [Here is the link to install it](https://www.python.org/downloads/), if needed. **If you use Windows**, make sure to choose the installer options to add Python to your PATH, and to disable Windows' 260-character path limit.
+Exhibiter requires Python 3.8 or higher to run. [Here is the link to install it](https://www.python.org/downloads/), if needed. If you use Windows, make sure to choose the installer options to add Python to your PATH, and to disable Windows' 260-character path limit.
 
 Once you have Python, you can install the program from a command prompt. On Windows, that's the `cmd` application; on MacOS it's `Terminal`. Run the following command:
 
@@ -24,9 +24,9 @@ When you first run the program after installing it, it will ask to install [Pand
 
 For the script to run correctly, all your evidence for the case must be organized in a specific way. This organizational structure is meant to be intuitive, but it still needs a little explanation.
 
-The Input Folder is the main folder that you want the program to process. It does not matter where this folder is, or what it is named; you will just need to tell the program where it is.
+The Input Folder is the main folder that you want the program to process, and it should contain all the relevant evidence. It does not matter where this folder is, or what it is named; you will just need to tell the program where it is.
 
-### Put Exhibits in the Evidence Folder
+### Put Exhibits in the Input Folder
 
 The Input Folder must contain one or more Exhibit Folders. These are folders whose names follow the patterns `NUMBER` or `NUMBER (TITLE)`, such as `101 (Rental Agreement)`. Each one will presumably contain one or more Documents. 
 
@@ -40,7 +40,7 @@ Consider the following examples:
 | 102 (Proof of Rent Payments)               | included, and its entry in the Exhibit List (though not the PDF) will be preceded by a title |
 | 103 (UNUSED)                               | excluded, except in Discovery Mode                           |
 | 104 (Photographs of the Interior) (UNUSED) | same as above, but with title                                |
-| Notes                                      | excluded because it doesn't follow with the `NUMER (TITLE)` format |
+| Notes                                      | excluded because it doesn't follow the `NUMBER (TITLE)` format |
 | 105.pdf                                    | excluded because it is not a folder                          |
 
 You probably shouldn't provide titles for Exhibits that contain only one Document, because in that case the Document name would make the title redundant.

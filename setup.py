@@ -5,7 +5,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name='exhibiter',
-    version='0.9.0',
+    version='0.9.1',
     description='a tool to organize evidence for litigation',
     author='Simon Raindrum Sherred',
     author_email='simonraindrum@gmail.com',
