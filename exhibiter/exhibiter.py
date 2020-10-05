@@ -321,14 +321,14 @@ def is_document(path):
     if (not args.discovery_mode and search(omitPattern, path.name)):
         return False
     elif (not path.is_dir() and
-    not search(".pdf$|.png$|.jpg$|.jpeg$", path.name)):
+    not search(extensions, path.name)):
         return False
     else: return True
     
 def is_page(path):
     if (not args.discovery_mode and search(omitPattern, path.name)):
         return False
-    if not search(".pdf$|.png$|.jpg$|.jpeg$", path.name):
+    if not search(extensions, path.name):
         return False
     elif (not args.discovery_mode and
     search(omitPattern, path.name)):
@@ -340,9 +340,9 @@ def is_page(path):
 # -------------------------------------------------------
 
 def set_globals():
-    global coverPages, referenceDoc, omitPattern, tempFile
+    global coverPages, referenceDoc, omitPattern, extensions
     global disputeFileName, outPdfWriter, img2pdfLayout, party
-    global outList, outPdf
+    global tempFile, outList, outPdf
     
     # find assets
     assetFolder = Path(__file__).parent.absolute() / "assets" 
@@ -355,6 +355,11 @@ def set_globals():
     # if this file exists in an Exhibit Folder,
     # its contents will be written into the exhibit list
     disputeFileName = "evidentiary disputes.txt"
+    
+    # files that match this pattern can be documents
+    # or document parts
+    extensions = ".pdf$|.png$|.jpg$|.jpeg$|"+\
+                 ".PDF$|.PNG$|.JPG$|.JPEG$"
     
     # files containing this regex will normally be omitted
     omitPattern = "\(UNUSED\)|\(EXCLUDE\)"
