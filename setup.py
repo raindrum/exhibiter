@@ -5,7 +5,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name='exhibiter',
-    version='0.9.2',
+    version='0.10.0',
     description='a tool to organize evidence for litigation',
     author='Simon Raindrum Sherred',
     author_email='simonraindrum@gmail.com',
@@ -26,6 +26,7 @@ setuptools.setup(
         'texttable',
         'pypandoc',
         'pillow',
+        'reportlab'
     ],
     classifiers=[
         'License :: Free To Use But Restricted',

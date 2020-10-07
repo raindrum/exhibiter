@@ -4,7 +4,7 @@ This is a tool to help organize evidence for litigation. If you keep your eviden
 
 I made this tool in the hopes that it would make eviction defense a little easier. Plaintiffs may use it as well, but *eviction plaintiffs* and their representatives may not. 
 
-Copyright 2020 Simon Raindrum Sherred.
+Copyright (c) 2020 Simon Raindrum Sherred.
 
 # Installation
 
@@ -22,15 +22,13 @@ When you first run the program after installing it, it will ask to install [Pand
 
 ## 1. Organize your Files First
 
-For the script to run correctly, all your evidence for the case must be organized in a specific way. This organizational structure is meant to be intuitive, but it still needs a little explanation.
-
-The Input Folder is the main folder that you want the program to process, and it should contain all the relevant evidence. It does not matter where this folder is, or what it is named; you will just need to tell the program where it is.
+To run this program, you must provide it with a folder full of organized evidence (the "input folder"). The input folder should contain one or more subfolders representing exhibits ("exhibit folders"). Exhibit folders, in turn, must contain one or more documents.
 
 ### Put Exhibits in the Input Folder
 
-The Input Folder must contain one or more Exhibit Folders. These are folders whose names follow the patterns `NUMBER` or `NUMBER (TITLE)`, such as `101 (Rental Agreement)`. Each one will presumably contain one or more Documents. 
+Exhibits are folders whose names follow the patterns `INDEX` or `INDEX (TITLE)`, where `INDEX` is a number, or a capital letter. An example exhibit would be  `101 (Rental Agreement)`.
 
-Exhibits (and Documents) will be omitted if their folder names contain `(UNUSED)` or `(EXCLUDE)` except if the program is run in Discovery Mode (`-d`).
+Exhibits (and individual documents) will be omitted if their folder names contain `(UNUSED)` or `(EXCLUDE)` except if the program is run in Discovery Mode (`-d`).
 
 Consider the following examples:
 
@@ -45,31 +43,41 @@ Consider the following examples:
 
 You probably shouldn't provide titles for Exhibits that contain only one Document, because in that case the Document name would make the title redundant.
 
-Also note that exhibit numbers over 200 will cause errors unless you add more pages to the included `assets/cover_pages.pdf`.
-
 ### Put Documents in each Exhibit Folder
 
-Each Exhibit Folder must contain one or more Documents, which will be arranged alphabetically.
+Each exhibit folder must contain one or more documents, which will be arranged alphabetically based on their filenames.
 
-A Document can be one of three things:
+A document can be one of three things:
 
 1. **a PDF**,
 2. **an image** (specifically .png, .jpg, or .jpeg), or
-3. **a folder of images**. The images will be arranged alphabetically by name, but only the folder name will be displayed as the name of the Document.
+3. **a folder of images**. The images will be arranged alphabetically by filename, but only the folder's name will be used as the name of the document.
 
-Anything else in an Exhibit folder will be ignored, except `evidentiary disputes.txt`. If this file is present, its contents will be written into the Evidentiary Disputes column of the exhibit list.
+Anything else in an Exhibit folder will be ignored, except `evidentiary disputes.txt`. If this file is present, its contents will be written into the Evidentiary Disputes column of the Exhibit List.
 
 #### Rules for Document Names
 
-Within each Exhibit, **the program arranges Documents alphabetically** based on their file names.
+Within each exhibit, **the program always arranges documents alphabetically** based on their filenames.
 
-**To arrange documents chronologically**, their names must start with a date in YYYY-MM-DD format followed by space (no other separators). For example, `2020-01-02 Welcome Note.pdf` will be detected and displayed in the Exhibit List as "Welcome Note 1/2/20."
+- **To arrange documents chronologically**, their names must start with a date in YYYY-MM-DD format followed by space (no other separators). For example, `2020-01-02 Welcome Note.pdf` will be detected and displayed in the Exhibit List as "Welcome Note 1/2/20."
 
-**Documents with dates will normally appear before those without**, because numbers precede letters.
+- **Documents with dates will normally appear before those without**, because numbers precede letters.
 
-**To arrange documents manually**, precede each filename with a series of digits, followed by a period and a space. For example, `01. Welcome Note` will be displayed in the Exhibit List as "Welcome Note." Leading numbers in this format will be hidden in the List unless the program is run with the `-k` or `--keep-digits` option.
+- **To arrange documents manually**, precede each filename with a series of digits, followed by a period and a space. For example, `01. Welcome Note.jpg` will be displayed in the Exhibit List as "Welcome Note." Leading numbers in this format will be hidden in the List unless the program is run with the `-k` or `--keep-digits` option.
 
-Documents whose names contain the `(UNUSED)` or `(EXCLUDE)` tag will be omitted from the output unless the program is run in Discovery Mode (`-d`). In Discovery Mode, the tag will be ignored and the Document will be included, with the tag stripped from its name.
+- Documents whose names contain the `(UNUSED)` or `(EXCLUDE)` tag will be omitted from the output unless the program is run in Discovery Mode (`-d`). In Discovery Mode, the tag will be ignored and the Document will be included, with the tag stripped from its name.
+
+### Example Folder Structure
+
+![Sample Input Folder](https://raw.githubusercontent.com/raindrum/exhibiter/master/Example Folder.png)
+
+This example folder demonstrates most of the ways evidence can be arranged:
+
+- Exhibits 102 through 104 have titles because their filenames contain a section in parentheses. Exhibit 101 is given no title because it would be redundant when it contains only one document.
+- The contents of Exhibits 102 and 103 are arranged chronologically because their filenames start with a date in YYYY-MM-DD format. They will appear in the exhibit list in chronological order, and the dates will be processed so that they show in the exhibit list as, e.g., "Rent Receipt 1/1/20."
+- The exact date for the security deposit in Exhibit 102 isn't known, but it can be manually arranged by giving it a number lower than the dates (here, 1). Because the number is followed by a period and a space, the program knows to exclude it from the document's name in the exhibit list; it will appear only as "Security Deposit."
+- One of the rent receipts in Exhibit 102, and the entirety of Exhibit 103, are marked "(UNUSED)." Therefore, they will be omitted unless the program is run in discovery mode.
+- Most files in the above example are treated as individual documents, whose filenames will appear in the exhibit list. The three images in the "Ceiling Photos" folder in Exhibit 104 are an exception; because they are inside a subfolder, they are treated as a single three-page document named "Ceiling Photos."
 
 ## 2. Run the Program
 

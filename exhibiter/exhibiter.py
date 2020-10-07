@@ -12,10 +12,13 @@ from tkinter.filedialog import askdirectory, asksaveasfilename
 from tkinter.messagebox import showwarning, askquestion, showinfo
 
 # third-party imports
-import img2pdf
-import texttable
-from pdfrw import PdfReader, PdfWriter
+from pdfrw import PdfReader, PdfWriter, PageMerge
+from reportlab.pdfgen.canvas import Canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.colors import black, white
 from pypandoc import get_pandoc_path, download_pandoc, convert_text
+import texttable
+import img2pdf
 from PIL import Image
 
 # -------------------------------------------------------
@@ -47,7 +50,8 @@ def cli_launch():
         "-d", "--discovery-mode",
         help="don't omit files and folders marked "+
         "\"(UNUSED)\" or \"(EXCLUDE)\". These tags will "+
-        "not be displayed in the exhibit list",
+        "not be displayed in the exhibit list. This mode "+
+        "also disables page numbering",
         action="store_true")
     parser.add_argument(
         "-o", "--outpdf",
@@ -117,7 +121,7 @@ def main():
         if not args.nopdf: outPdf.addpage(exhibit.coverPage)
         for y in sorted(x.iterdir()):
             if not is_document(y): continue
-            document = Document(y)
+            document = Document(y, exhibit)
             print("  "+document.list_line())
             exhibit.include(document)
         outList.include(exhibit)
@@ -201,7 +205,7 @@ class ExhibitList:
             party+" Exhibit List**"+
             "\n\n### "+party.upper()+" EXHIBITS\n")
         self.table = texttable.Texttable()
-        self.table.set_cols_width([5,4,4,41,18])
+        self.table.set_cols_width([22,10,10,100,60])
         self.table.header([
             '**No.**',
             '**ID**',
@@ -210,7 +214,8 @@ class ExhibitList:
             '**Evidentiary Disputes**'])
     
     def __str__(self):         
-        t = self.table.draw().replace("+=","+:").replace("=+",":+",3)
+        t = self.table.draw()
+        t = t.replace("+=","+:").replace("=+",":+",3)
         return self.header+t
     
     def include(self, exhibit):
@@ -219,48 +224,87 @@ class ExhibitList:
         
     def reserve_rebuttal(self):
         lastNumber = self.exhibits[-1].number
+        if search("[A-Y]", lastNumber):
+            nextNumber = ord(lastNumber)
+            nextNumber += 1
+            nextNumber = chr(nextNumber)
+        else: 
+            nextNumber = str(int(lastNumber)+1)
         self.table.add_row([
-            lastNumber+1,
+            nextNumber,
             "X",
             "",
             "Reserved for Rebuttal",
             ""
         ])
-        print("EXHIBIT "+str(lastNumber+1)+": Reserved for Rebuttal")
+        print("EXHIBIT "+nextNumber+": Reserved for Rebuttal")
 
 
 class Exhibit:
     def __init__(self, path):
         self.path = path
+        self.pagecount = 0
         filenameSections = path.stem.split(' ', 1)
-        self.number = int(filenameSections[0])
-        self.coverPage = PdfReader(coverPages).pages[self.number-1]
+        self.number = filenameSections[0]
+        self.numberColumn = filenameSections[0]
+        self.coverPage = self.make_cover_page()
         self.name = filenameSections[0]
         self.description = ""
         self.disputes = ""
         self.documents = []
+        self.title = ""
         if len(filenameSections) > 1:
             self.title = sub(omitPattern, "", filenameSections[1]).strip('( )')
-            self.name = str(self.number) + ": " + self.title
+            self.name = self.number + ": " + self.title
             self.description += self.title + ":"
         disputeFilePath = path / disputeFileName
         if disputeFilePath.exists():
             self.disputes += disputeFilePath.read_text()
+
+    def make_cover_page(self):
+        c = Canvas(str(tempFile), pagesize=letter)
+        width, height = letter
+        c.setFont("Helvetica",32)
+        c.drawCentredString(
+            width/2,
+            height/7,
+            str("EXHIBIT "+self.number))
+        c.save()
+        return PdfReader(tempFile).pages[0]
     
     def include(self, document):
         self.documents.append(document)
         if self.description: self.description += "</p><p>"
+        if not args.discovery_mode:
+            self.updateNumberColumn(document)
+        self.pagecount += document.pagecount
         self.description += document.list_line()
-    
-    def listRow(self): 
-        return [self.number,"X","",self.description,self.disputes]
+        
+    def updateNumberColumn(self, document):
+        num = len(self.documents)
+        exh = self.number
+        if num == 2:
+            if self.title: self.numberColumn+="</p><p>"+exh
+            self.numberColumn+="-1"
+        if num >= 2:
+            self.numberColumn+="</p><p>"
+            self.numberColumn+=exh+"-"+str(document.startPage)
 
+    def listRow(self): 
+        return [
+            self.numberColumn,
+            "X",
+            "",
+            self.description,
+            self.disputes
+        ]
 
 class Document:
-    def __init__(self, path):
+    def __init__(self, path, exhibit):
+        self.exhibit = exhibit
         self.path = path
+        self.startPage = exhibit.pagecount + 1
         self.pagecount = 0
-        self.pages=[]
         self.formatName(path)
         if path.is_dir():
             for x in sorted(path.iterdir()):
@@ -282,7 +326,7 @@ class Document:
                         self.name[5:7].lstrip('0')+
                         "/"+self.name[8:10].lstrip('0')+
                         "/"+self.name[2:4])
-    
+
     def include(self, path):
         if search(".pdf$", path.name):
             newPages = PdfReader(path).pages
@@ -295,11 +339,42 @@ class Document:
             img.close()
             temp.close()
             newPages = PdfReader(tempFile).pages
-        if not args.nopdf: outPdf.addpages(newPages)
-        self.pagecount += len(newPages)
+        if not args.nopdf:
+            for page in newPages:
+                self.pagecount += 1
+                if not args.discovery_mode:
+                    page = self.numbered_page(
+                        page,
+                        self.pagecount + self.exhibit.pagecount
+                    )
+                outPdf.addpage(page)
     
-    def list_line(self):
+    def numbered_page(self, page, num):
+        c = Canvas(str(tempFile), pagesize=letter)
+        width, height = letter
+        c.setFillColor(white)
+        midx = width/2
+        midy = height/22
+        c.rect(
+            midx-25,
+            midy-4,
+            50,
+            15,
+            stroke=0,
+            fill=1)
+        c.setFillColor(black)
+        c.drawCentredString(
+            width/2,
+            height/22,
+            self.exhibit.number+"-"+str(num))
+        c.save()
+        numPdf = PdfReader(tempFile)
+        numPage = numPdf.pages[0]
+        merger = PageMerge(page)
+        merger.add(numPage).render()
+        return page
         
+    def list_line(self):
         if args.no_page_counts or self.pagecount <= 1:
             return self.name
         else: 
@@ -312,7 +387,7 @@ class Document:
 
 def is_exhibit(path):
     if not path.is_dir(): return False
-    elif not search("\d+( \(.+\))?", path.name): return False
+    elif not search("(\d+|[A-Y])( \(.+\))?", path.name): return False
     elif (not args.discovery_mode and search(omitPattern, path.name)):
         return False
     else: return True
@@ -340,13 +415,12 @@ def is_page(path):
 # -------------------------------------------------------
 
 def set_globals():
-    global coverPages, referenceDoc, omitPattern, extensions
+    global referenceDoc, omitPattern, extensions
     global disputeFileName, outPdfWriter, img2pdfLayout, party
     global tempFile, outList, outPdf
     
     # find assets
     assetFolder = Path(__file__).parent.absolute() / "assets" 
-    coverPages = assetFolder / "cover_pages.pdf"
     referenceDoc = str(assetFolder / "list_style.docx")
     
     if args.plaintiff: party = "Plaintiff"

@@ -5,4 +5,4 @@
 *.pdf
 *.egg-info/
 build/
-sample/
+demo/
