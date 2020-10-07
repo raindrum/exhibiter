@@ -80,7 +80,12 @@ def cli_launch():
         help="don't create a pdf of evidence",
         action="store_true")
     parser.add_argument(
-        "--no-page-counts",
+        "-s", "--show-start-pages",
+        help="display the start page (e.g. 101-35) of each "+
+             "document in the exhibit list",
+        action="store_true")
+    parser.add_argument(
+        "-n", "--no-page-counts",
         help="don't append page counts to the "+
              "names of multi-page documents",
         action="store_true")
@@ -223,7 +228,7 @@ class ExhibitList:
         self.table.add_row(exhibit.listRow())
         
     def reserve_rebuttal(self):
-        lastNumber = self.exhibits[-1].number
+        lastNumber = self.exhibits[-1].index
         if search("[A-Y]", lastNumber):
             nextNumber = ord(lastNumber)
             nextNumber += 1
@@ -245,8 +250,7 @@ class Exhibit:
         self.path = path
         self.pagecount = 0
         filenameSections = path.stem.split(' ', 1)
-        self.number = filenameSections[0]
-        self.numberColumn = filenameSections[0]
+        self.index = filenameSections[0]
         self.coverPage = self.make_cover_page()
         self.name = filenameSections[0]
         self.description = ""
@@ -255,7 +259,7 @@ class Exhibit:
         self.title = ""
         if len(filenameSections) > 1:
             self.title = sub(omitPattern, "", filenameSections[1]).strip('( )')
-            self.name = self.number + ": " + self.title
+            self.name = self.index + ": " + self.title
             self.description += self.title + ":"
         disputeFilePath = path / disputeFileName
         if disputeFilePath.exists():
@@ -268,31 +272,19 @@ class Exhibit:
         c.drawCentredString(
             width/2,
             height/7,
-            str("EXHIBIT "+self.number))
+            str("EXHIBIT "+self.index))
         c.save()
         return PdfReader(tempFile).pages[0]
     
     def include(self, document):
         self.documents.append(document)
         if self.description: self.description += "</p><p>"
-        if not args.discovery_mode:
-            self.updateNumberColumn(document)
         self.pagecount += document.pagecount
         self.description += document.list_line()
-        
-    def updateNumberColumn(self, document):
-        num = len(self.documents)
-        exh = self.number
-        if num == 2:
-            if self.title: self.numberColumn+="</p><p>"+exh
-            self.numberColumn+="-1"
-        if num >= 2:
-            self.numberColumn+="</p><p>"
-            self.numberColumn+=exh+"-"+str(document.startPage)
 
     def listRow(self): 
         return [
-            self.numberColumn,
+            self.index,
             "X",
             "",
             self.description,
@@ -319,7 +311,8 @@ class Document:
         self.name = sub(omitPattern, "", path.stem).strip(' ')
         # if name begins with a number, remove it
         if not args.keep_digits:
-            self.name = sub("^\d+\. ", "", self.name) 
+            self.name = sub("^\d+\. ", "", self.name)
+
         # if name begins with YYYY-MM-DD, put M/D/YYYY at end
         if search("^\d{4}-\d{2}-\d{2} .+", self.name):
             self.name = (self.name[11:]+" "+
@@ -366,7 +359,7 @@ class Document:
         c.drawCentredString(
             width/2,
             height/22,
-            self.exhibit.number+"-"+str(num))
+            self.exhibit.index+"-"+str(num))
         c.save()
         numPdf = PdfReader(tempFile)
         numPage = numPdf.pages[0]
@@ -375,10 +368,12 @@ class Document:
         return page
         
     def list_line(self):
-        if args.no_page_counts or self.pagecount <= 1:
-            return self.name
-        else: 
-            return self.name + " ("+str(self.pagecount)+")"
+        line = self.name
+        if args.show_start_pages:
+            line+=" ("+self.exhibit.index+"-"+str(self.startPage)+")"
+        if self.pagecount > 1 and not args.no_page_counts:
+            line+=" ("+str(self.pagecount)+")"
+        return line
 
 
 # -------------------------------------------------------
