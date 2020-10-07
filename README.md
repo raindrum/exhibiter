@@ -69,7 +69,7 @@ Within each exhibit, **the program always arranges documents alphabetically** ba
 
 ### Example Folder Structure
 
-![Sample Input Folder](https://raw.githubusercontent.com/raindrum/exhibiter/master/Example Folder.png)
+![Sample Input Folder](https://raw.githubusercontent.com/raindrum/exhibiter/master/ExampleFolder.png)
 
 This example folder demonstrates most of the ways evidence can be arranged:
 
