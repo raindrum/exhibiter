@@ -38,7 +38,7 @@ Consider the following examples:
 | 102 (Proof of Rent Payments)               | included, and its entry in the Exhibit List (though not the PDF) will be preceded by a title |
 | 103 (UNUSED)                               | excluded, except in Discovery Mode                           |
 | 104 (Photographs of the Interior) (UNUSED) | same as above, but with title                                |
-| Notes                                      | excluded because it doesn't follow the `NUMBER (TITLE)` format |
+| Notes                                      | excluded because it doesn't follow the `INDEX (TITLE)` format |
 | 105.pdf                                    | excluded because it is not a folder                          |
 
 You probably shouldn't provide titles for Exhibits that contain only one Document, because in that case the Document name would make the title redundant.
@@ -90,3 +90,23 @@ Exhibiter is primarily a command-line tool, though it also has a basic GUI optio
 If you don't use the `-g` option, you will need to specify an input folder from the command line by running `exhibiter INPUTFOLDER`. In this mode, the program will output to `Defense Exhibits.pdf` and `Defense Exhibit List.docx` in the current directory, unless you override those defaults with the `-o` and `-l` options respectively.
 
 To see more options you can specify when running the program, run `exhibiter -h`.
+
+# Command Line Options
+
+Whether run in graphical mode or not, it's possible to pass a number of command-line options to the program to affect how it runs. These are explained below:
+
+| Option                             | Description                                                  |
+| ---------------------------------- | ------------------------------------------------------------ |
+| `-g` or `--gui`                    | Use a graphical interface to select the input and output files and whether to use discovery mode, assuming those are not specified explicitly in the command line. This is meant as a tool for those who are not comfortable navigating their filesystem via a command line; it does not allow graphical selection of other program options, though they can be specified as additional command-line options while using `-g`. |
+| `-d` or `--discovery-mode`         | Output discovery responses instead of trial exhibits. If this option is specified, the output will include the files marked `(UNUSED)` or `(EXCLUDE)`, but will not print page numbers. |
+| `-o` or `--outpdf`                 | Specify where to output the PDF containing all evidence. Defaults to "Defense Exhibits.pdf" in the current directory. |
+| `-l` or `--outlist`                | Specify where to output the DOCX file listing the evidence. Defaults to "Defense Exhibit List.docx" in the current directory. |
+| `-k` or `--keep-digits`            | When processing file names to create entries in the exhibit list, the program normally assumes that when a file name starts with a number, followed by a period and a space, the number is not actually part of the document name. So a file named "2. Lease addendum.pdf" will normally appear in the exhibit list as "Lease addendum". With the `-k` option, it would appear instead as "2. Lease addendum". |
+| `-c` or `--page-label-coordinates` | When not in discovery mode, the program prints exhibit page numbers (e.g. 101-3) on each page of evidence. By default the program places those page numbers near the bottom middle of the page, but sometimes this will obstruct evidence. This option lets you provide coordinates where the label should be placed, expressed as percentages of the way across and up the page. For instance, `-c 95 10` will print the label near the bottom right of the page, because it will be 95% *across* and 10% *up* the page. |
+| `-n` or `-no-list-page-numbers`    | Normally, when not in Discovery Mode, the exhibit list will show the start and end page of each document, in parentheses. This option disables that. |
+| `-p` or `--plaintiff`              | Label the list as a plaintiff's exhibit list rather than defendant's. |
+| `--attachno`                       | Specify what attachment number to label the exhibit list as. Defaults to 4. |
+| `--no-rebuttal`                    | Ordinarily the exhibit list will show one empty exhibit at the end, titled "Reserved for Rebuttal." This option disables that. |
+| `--nopdf`                          | Do not output a PDF of evidence.                             |
+| `--nolist`                         | Do not output a DOCX listing evidence.                       |
+

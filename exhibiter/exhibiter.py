@@ -64,30 +64,25 @@ def cli_launch():
              "(defaults to ./Defense Exhibit List.docx)",
         action="store")
     parser.add_argument(
-        "-p", "--plaintiff",
-        help="label as plaintiff list instead of defense",
-        action="store_true")
-    parser.add_argument(
         "-k", "--keep-digits",
         help="don't remove leading digits from document names",
         action="store_true")
     parser.add_argument(
-        "--nolist",
-        help="don't create an exhibit list",
+        "-c", "--page-label-coordinates",
+        nargs=2,
+        help="the X and Y position of the page number printed on " +
+             "PDF pages, expressed as percentages of the page, " +
+             "starting from the left and bottom. Defaults to %(default)s",
+        default=[50, 5],
+        type=int)
+    parser.add_argument(
+        "-n", "--no-list-page-numbers",
+        help="don't show the start and end pages of documents "+
+             "in the exhibit list",
         action="store_true")
     parser.add_argument(
-        "--nopdf",
-        help="don't create a pdf of evidence",
-        action="store_true")
-    parser.add_argument(
-        "-s", "--show-start-pages",
-        help="display the start page (e.g. 101-35) of each "+
-             "document in the exhibit list",
-        action="store_true")
-    parser.add_argument(
-        "-n", "--no-page-counts",
-        help="don't append page counts to the "+
-             "names of multi-page documents",
+        "-p", "--plaintiff",
+        help="label as plaintiff list instead of defense",
         action="store_true")
     parser.add_argument(
         "--no-rebuttal",
@@ -99,6 +94,14 @@ def cli_launch():
              "the exhibit list (defaults to 4)",
         action="store",
         default="4")
+    parser.add_argument(
+        "--nolist",
+        help="don't create an exhibit list",
+        action="store_true")
+    parser.add_argument(
+        "--nopdf",
+        help="don't create a pdf of evidence",
+        action="store_true")
     args = parser.parse_args()
     main()
 
@@ -248,7 +251,7 @@ class ExhibitList:
 class Exhibit:
     def __init__(self, path):
         self.path = path
-        self.pagecount = 0
+        self.pageCount = 0
         filenameSections = path.stem.split(' ', 1)
         self.index = filenameSections[0]
         self.coverPage = self.make_cover_page()
@@ -279,7 +282,7 @@ class Exhibit:
     def include(self, document):
         self.documents.append(document)
         if self.description: self.description += "</p><p>"
-        self.pagecount += document.pagecount
+        self.pageCount += document.pageCount
         self.description += document.list_line()
 
     def listRow(self): 
@@ -295,8 +298,8 @@ class Document:
     def __init__(self, path, exhibit):
         self.exhibit = exhibit
         self.path = path
-        self.startPage = exhibit.pagecount + 1
-        self.pagecount = 0
+        self.startPage = exhibit.pageCount + 1
+        self.pageCount = 0
         self.formatName(path)
         if path.is_dir():
             for x in sorted(path.iterdir()):
@@ -334,11 +337,11 @@ class Document:
             newPages = PdfReader(tempFile).pages
         if not args.nopdf:
             for page in newPages:
-                self.pagecount += 1
+                self.pageCount += 1
                 if not args.discovery_mode:
                     page = self.numbered_page(
                         page,
-                        self.pagecount + self.exhibit.pagecount
+                        self.pageCount + self.exhibit.pageCount
                     )
                 outPdf.addpage(page)
     
@@ -346,8 +349,8 @@ class Document:
         c = Canvas(str(tempFile), pagesize=letter)
         width, height = letter
         c.setFillColor(white)
-        midx = width/2
-        midy = height/22
+        midx = width/100 * args.page_label_coordinates[0]
+        midy = height/100 * args.page_label_coordinates[1]
         c.rect(
             midx-25,
             midy-4,
@@ -357,8 +360,8 @@ class Document:
             fill=1)
         c.setFillColor(black)
         c.drawCentredString(
-            width/2,
-            height/22,
+            midx,
+            midy,
             self.exhibit.index+"-"+str(num))
         c.save()
         numPdf = PdfReader(tempFile)
@@ -369,10 +372,11 @@ class Document:
         
     def list_line(self):
         line = self.name
-        if args.show_start_pages:
-            line+=" ("+self.exhibit.index+"-"+str(self.startPage)+")"
-        if self.pagecount > 1 and not args.no_page_counts:
-            line+=" ("+str(self.pagecount)+")"
+        if not args.no_list_page_numbers and not args.discovery_mode:
+            line += ' (' + str(self.startPage)
+            if self.pageCount > 1:
+                line += '-' + str(self.startPage + self.pageCount - 1)
+            line += ')'
         return line
 
 
