@@ -1,5 +1,4 @@
-graft exhibiter/assets
-include icon.svg
+include exhibiter/template.docx
+include graphics/icon.ico
 include LICENSE.md
 include README.md
-include icon.svg

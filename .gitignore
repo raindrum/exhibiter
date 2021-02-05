@@ -1,8 +1,7 @@
-*.spec
 *.sh
-*.deb
 *.docx
 *.pdf
 *.egg-info/
+*/__pycache__
 build/
-demo/
+binaries/
