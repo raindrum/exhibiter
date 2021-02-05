@@ -1,7 +1,6 @@
 *.sh
-*.docx
-*.pdf
 *.egg-info/
 */__pycache__
+__pycache__/
 build/
 binaries/
