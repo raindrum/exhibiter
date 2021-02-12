@@ -267,20 +267,26 @@ def write_list(
     template = str(Path(__file__).parent.absolute() / "template.docx")
     exhibit_list = Document(template)
 
-    # write header
+    # fill in title line
     exhibit_list.paragraphs[0].add_run(
         f"Attachment {attachment_no}: Exhibit List"
     ).bold = True
+    
+    # write table header
     exhibit_list.tables[0].rows[0].cells[0].paragraphs[0].add_run(
         f"{party_label.upper()} EXHIBITS"
     ).bold = True
-
-    for exhibit in exhibits:  # create each table row
+    
+    for exhibit in exhibits:
+        # add a table row, to represent the exhibit
         row = exhibit_list.tables[0].add_row()
         row.cells[0].text = exhibit.index
         row.cells[1].text = "X"
+        
+        # center-align the first two cells
         for c in [0, 1]:  # center-align columns 0 and 1
             row.cells[c].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+        
         if exhibit.title:  # list exhibit's title above its documents
             row.cells[3].paragraphs[0].text = exhibit.title + ":"
         for i, doc in enumerate(exhibit.documents):
@@ -303,6 +309,7 @@ def write_list(
             next_index = chr(ord(last_index) + 1)
         else:
             next_index = str(int(last_index) + 1)
+        
         # reserve that exhibit for rebuttal
         row = exhibit_list.tables[0].add_row()
         row.cells[0].text = next_index
