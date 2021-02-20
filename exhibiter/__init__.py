@@ -78,14 +78,18 @@ class Exhibit:
                 )
 
         # get index and title (if any) from filename.
-        folder_name = exhibit_path.stem
-        folder_name = _process_filename(folder_name, False)
+        folder_name = exhibit_path.name
+        folder_name = _process_filename(exhibit_path.name, False)
         sections = folder_name.split(". ", 1)
         index = sections[0]
+        
+        # add a title only if the exhibit path is a directory. For one-file
+        # exhibits, the document name makes a title unnecessary
         if len(sections) > 1 and exhibit_path.is_dir():
             title = sections[1]
         else:
             title = None
+        
         # get evidentiary disputes
         dispute_file = exhibit_path / DISPUTE_FILE
         if dispute_file.exists():
@@ -163,7 +167,7 @@ class Exhibit:
         if not title:
             title = _process_filename(doc_path.stem, strip_leading_digits)
 
-        if doc_path.is_dir():  # walk through directory and files to doc
+        if doc_path.is_dir():  # walk through directory and add files to doc
             file_paths = []
             for extension in FILE_TYPES:
                 file_paths += doc_path.glob("**/*." + extension)
@@ -174,7 +178,7 @@ class Exhibit:
                     continue
                 self._insert_pdf_or_image(path)
 
-        else:  # single-file documents
+        else: # add single-file document to exhibit
             self._insert_pdf_or_image(doc_path)
         self.documents.append(
             {"name": title, "page_span": (startpage, self.page_count), "path": doc_path}
@@ -281,14 +285,16 @@ def write_list(
         # add a table row, to represent the exhibit
         row = exhibit_list.tables[0].add_row()
         row.cells[0].text = exhibit.index
-        row.cells[1].text = "X"
         
         # center-align the first two cells
         for c in [0, 1]:  # center-align columns 0 and 1
             row.cells[c].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
         
-        if exhibit.title:  # list exhibit's title above its documents
+        # write the exhibit title
+        if exhibit.title:
             row.cells[3].paragraphs[0].text = exhibit.title + ":"
+        
+        # add a line for each document in the exhibit
         for i, doc in enumerate(exhibit.documents):
             # use an existing blank paragraph then make one for each doc
             if i == 0 and not exhibit.title:
@@ -305,7 +311,6 @@ def write_list(
         # calculate the next exhibit number or letter
         last_index = exhibits[-1].index
         if search("[A-Y]", last_index):
-            print(last_index)
             next_index = chr(ord(last_index) + 1)
         else:
             next_index = str(int(last_index) + 1)
@@ -313,7 +318,6 @@ def write_list(
         # reserve that exhibit for rebuttal
         row = exhibit_list.tables[0].add_row()
         row.cells[0].text = next_index
-        row.cells[1].text = "X"
         row.cells[3].text = "Reserved for Rebuttal"
         for c in [0, 1]:
             row.cells[c].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -344,6 +348,9 @@ def _process_filename(name: str, strip_leading_digits: bool = True) -> str:
     dates to the end, in M/D/YY format. Also, converts things like
     "1. First Document" to "First Document" by default.
     """
+    # remove file extension
+    filetypes_regex = '(\.' + '|\.'.join(FILE_TYPES) + ')$'
+    name = sub(filetypes_regex, '', name)
     
     # remove the exclude pattern
     name = sub(" ?(" + EXCLUDE_PATTERN + ")", "", name)
