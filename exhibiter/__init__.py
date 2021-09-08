@@ -72,13 +72,12 @@ class Exhibit:
                 )
             elif not fullmatch("^(\d+|[A-Y])\. .+", exhibit_path.stem):
                 raise SyntaxError(
-                    f'"{exhibit_path.name}" is not a valid name for a'
-                    + ' single-document exhibit. It must have a title,'
-                    + ' like "101. Rental Agreement.pdf".'
+                    f'"{exhibit_path.name}" is not a valid name for an'
+                    + ' exhibit that is only one file. It must have a'
+                    + ' title, like "101. Rental Agreement.pdf".'
                 )
 
         # get index and title (if any) from filename.
-        folder_name = exhibit_path.name
         folder_name = _process_filename(exhibit_path.name, False)
         sections = folder_name.split(". ", 1)
         index = sections[0]
@@ -90,12 +89,13 @@ class Exhibit:
         else:
             title = None
         
-        # get evidentiary disputes
+        # read evidentiary disputes file if there is one
         dispute_file = exhibit_path / DISPUTE_FILE
         if dispute_file.exists():
             evidentiary_disputes = dispute_file.read_text()
         else:
             evidentiary_disputes = None
+            
         # generate exhibit
         exhibit = cls(
             index,
@@ -110,7 +110,7 @@ class Exhibit:
         if exhibit_path.is_dir():
             for path in evidence_in_dir(exhibit_path, respect_exclusions):
                 exhibit.add_doc(path, strip_leading_digits=strip_leading_digits)
-        else:  # if the exhibit is just a single file, add it
+        else:
             exhibit.add_doc(
                 exhibit_path,
                 title=sub("^(\d+|[A-Z])\. ", "", exhibit_path.stem)
@@ -290,21 +290,42 @@ def write_list(
         for c in [0, 1]:  # center-align columns 0 and 1
             row.cells[c].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
         
-        # write the exhibit title
-        if exhibit.title:
-            row.cells[3].paragraphs[0].text = exhibit.title + ":"
+        # write the exhibit title unless it would be redundant
+        if (
+            exhibit.title and not
+            (
+                len(exhibit.documents) == 1 and
+                exhibit.documents[0]['name'] == exhibit.title
+            )
+        ):
+            if len(exhibit.documents) > 0:
+                title_str = exhibit.title + ':'
+            else:
+                title_str = exhibit.title
+            
+            row.cells[3].paragraphs[0].text = title_str
+            show_title = True
+        else:
+            show_title = False
         
         # add a line for each document in the exhibit
         for i, doc in enumerate(exhibit.documents):
             # use an existing blank paragraph then make one for each doc
-            if i == 0 and not exhibit.title:
+            if i == 0 and not show_title:
                 paragraph = row.cells[3].paragraphs[0]
             else:
                 paragraph = row.cells[3].add_paragraph()
             description = doc["name"]
-            if i > 0 and show_page_numbers:  # e.g. "(p.32)"
-                description += f" (p.{doc['page_span'][0]})"
+            
+            if len(exhibit.documents) > 1 and show_page_numbers:
+                span = doc['page_span']
+                if span[1] - span[0] > 0:
+                    description += f' (pp.{span[0]}-{span[1]})'
+                else:
+                    description += f' (p.{span[0]})'
+            
             paragraph.text = description
+            
         row.cells[4].text = exhibit.evidentiary_disputes or ""
 
     if reserve_rebuttal:
@@ -335,18 +356,19 @@ def evidence_in_dir(folder: Path, respect_exclusions: bool = True):
         if respect_exclusions and search(EXCLUDE_PATTERN, path.stem):
             continue
         returns.append(path)
-    if returns:
-        return returns
-    else:
-        raise FileNotFoundError(f"{folder} doesn't seem to contain any evidence.")
+    return returns
+    # if returns:
+    #     return returns
+    # else:
+    #     raise FileNotFoundError(f"{folder} doesn't seem to contain any evidence.")
 
 
 def _process_filename(name: str, strip_leading_digits: bool = True) -> str:
     """
     Convert a filename into a document description.
-    Strips EXCLUDE_PATTERN, if present, and moves leading YYYY-MM-DD
-    dates to the end, in M/D/YY format. Also, converts things like
-    "1. First Document" to "First Document" by default.
+    Strips EXCLUDE_PATTERN, if present, and moves leading dates (YYYY-MM-DD
+    or YYYYMMDD) to the end, in M/D/YY format. Also, converts things like
+    "01. First Document" to "First Document" by default.
     """
     # remove file extension
     filetypes_regex = '(\.' + '|\.'.join(FILE_TYPES) + ')$'
@@ -355,17 +377,23 @@ def _process_filename(name: str, strip_leading_digits: bool = True) -> str:
     # remove the exclude pattern
     name = sub(" ?(" + EXCLUDE_PATTERN + ")", "", name)
     
-    # if name begins with YYYY-MM-DD, put M/D/YYYY at end
-    if search("^\d{4}-\d{2}-\d{2} .+", name):
-        name = (
-            name[11:]
-            + " "
-            + name[5:7].lstrip("0")
-            + "/"
-            + name[8:10].lstrip("0")
-            + "/"
-            + name[2:4]
+    # if name begins with YYYY-MM-DD or YYYYMMDD, put M/D/YYYY at end
+    date_match = search(
+        "^(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2}) ",
+        name
+    )
+    if not date_match:
+        date_match = search(
+            "^(?P<year>\d{4})(?P<month>\d{2})(?P<day>\d{2}) ",
+            name
         )
+    if date_match:
+        name = name.replace(date_match.group(0), '')
+        g = date_match.groupdict()
+        month, day = g['month'].lstrip('0'), g['day'].lstrip('0')
+        year = g['year']
+        name += f' {month}/{day}/{year}'
+        
     # if name starts with a number, period, and space, remove it
     elif strip_leading_digits:
         name = sub("^\d+\. ", "", name)

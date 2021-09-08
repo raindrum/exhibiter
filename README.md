@@ -48,7 +48,7 @@ Each document will appear in the exhibit list with a description derived from it
 
 1. First, Exhibiter removes the file extension, e.g. `.pdf`.
 2. If the filename starts with a number followed by a period and a space, Exhibiter removes this number, on the assumption that it's only meant for indicating the order of documents.
-3. If the filename starts with a date in YYYY-MM-DD format, Exhibiter moves it to the end of the description, in M/D/YY format. If chronology is important, you should start filenames with YYYY-MM-DD dates so that they will appear in chronological order. An example document filename is `2019-01-03 Rent Payment.jpg`.
+3. If the filename starts with a date in YYYY-MM-DD or YYYYMMDD format, Exhibiter moves it to the end of the description, in M/D/YY format. If chronology is important, you should start filenames with these dates so that they will appear in chronological order. An example document filename is `2019-01-03 Rent Payment.jpg`.
 4. If the document's filename ends with `(UNUSED)`, the document will normally be omitted, the same way that entire exhibits with that tag will be omitted. If you tell Exhibiter *not* to omit such documents, the word `(UNUSED)` will be omitted from the description.
 
 ## Run the Program

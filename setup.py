@@ -5,7 +5,7 @@ with open('README.md', 'r') as readme_file:
 
 setuptools.setup(
     name='exhibiter',
-    version='1.0.1',
+    version='1.0.2',
     description='a tool to organize evidence for litigation',
     author='Simon Raindrum Sherred',
     author_email='simonraindrum@gmail.com',
