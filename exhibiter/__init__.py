@@ -16,7 +16,7 @@ from PIL import Image
 
 # global variables
 FILE_TYPES = ["png", "PNG", "jpg", "JPG", "jpeg", "JPEG", "pdf", "PDF"]
-EXCLUDE_PATTERN = "\((UNUSED|[Uu]nused)\)"
+EXCLUDE_PATTERN = r"\((UNUSED|[Uu]nused)\)"
 DISPUTE_FILE = "evidentiary disputes.txt"
 
 
@@ -165,8 +165,9 @@ class Exhibit:
         startpage = self.page_count + 1
 
         if not title:
-            title = _process_filename(doc_path.stem, strip_leading_digits)
+            title = _process_filename(doc_path.name, strip_leading_digits)
 
+        
         if doc_path.is_dir():  # walk through directory and add files to doc
             file_paths = []
             for extension in FILE_TYPES:
@@ -174,12 +175,13 @@ class Exhibit:
 
             # add each file in order, except the ones marked for omission
             for path in sorted(file_paths):
-                if respect_exclusions and search(EXCLUDE_PATTERN, path.stem):
+                if respect_exclusions and search(EXCLUDE_PATTERN, path.name):
                     continue
                 self._insert_pdf_or_image(path)
 
         else: # add single-file document to exhibit
             self._insert_pdf_or_image(doc_path)
+        
         self.documents.append(
             {"name": title, "page_span": (startpage, self.page_count), "path": doc_path}
         )
@@ -353,7 +355,7 @@ def evidence_in_dir(folder: Path, respect_exclusions: bool = True):
         if not path.is_dir() and path.suffix[1:] not in FILE_TYPES:
             continue
         # skip files containing the exclude pattern (by default)
-        if respect_exclusions and search(EXCLUDE_PATTERN, path.stem):
+        if respect_exclusions and search(EXCLUDE_PATTERN, path.name):
             continue
         returns.append(path)
     return returns

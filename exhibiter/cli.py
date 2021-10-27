@@ -89,7 +89,10 @@ def cli():
     )
     parser.add_argument(
         "--attachno",
-        help="which trial document attachment the exhibit list is. Defaults " + "to 4.",
+        help=(
+            "which trial document attachment the "
+            "exhibit list is. Defaults to 4."
+        ),
         type=int,
         default=4,
     )
