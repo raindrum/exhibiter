@@ -4,6 +4,7 @@
 # python standard imports
 from re import search, sub, fullmatch
 from pathlib import Path
+from copy import copy
 
 # third-party imports
 from pdfrw import PdfReader, PdfWriter, buildxobj, toreportlab
@@ -100,10 +101,10 @@ class Exhibit:
         exhibit = cls(
             index,
             title,
-            number_pages=number_pages,
-            page_label_coords=page_label_coords,
-            rotate_landscape_pics=rotate_landscape_pics,
-            evidentiary_disputes=evidentiary_disputes,
+            number_pages = number_pages,
+            page_label_coords = page_label_coords,
+            rotate_landscape_pics = rotate_landscape_pics,
+            evidentiary_disputes = evidentiary_disputes,
         )
 
         # add all evidence from the path to it
@@ -268,6 +269,7 @@ def write_list(
     party_label: str = "Defense",
     show_page_numbers: bool = True,
     reserve_rebuttal: bool = True,
+    row_per_doc: bool = True,
 ):
     """Save a Word document listing the given exhibits in detail."""
     template = str(Path(__file__).parent.absolute() / "template.docx")
@@ -282,6 +284,30 @@ def write_list(
     exhibit_list.tables[0].rows[0].cells[0].paragraphs[0].add_run(
         f"{party_label.upper()} EXHIBITS"
     ).bold = True
+    
+    # treat each doc as its own exhibit
+    if row_per_doc:
+        new_exhibits = []
+        for exhibit in exhibits:
+            for document in exhibit.documents:
+                start = document['page_span'][0]
+                end = document['page_span'][1]
+                index = exhibit.index
+                
+                if len(exhibit.documents) == 1:
+                    pass
+                elif end > start:
+                    index = f'{index}-{start}\nto\n{index}-{end}'
+                else:
+                    index = f'{index}-{start}'
+                
+                new_exhibit = Exhibit(
+                    index = index,
+                    title = document['name'],
+                )
+                new_exhibit.documents = [document]
+                new_exhibits.append(new_exhibit)
+        exhibits = new_exhibits
     
     for exhibit in exhibits:
         # add a table row, to represent the exhibit
@@ -333,6 +359,8 @@ def write_list(
     if reserve_rebuttal:
         # calculate the next exhibit number or letter
         last_index = exhibits[-1].index
+        if '-' in last_index:
+            last_index = last_index.split('-')[0]
         if search("[A-Y]", last_index):
             next_index = chr(ord(last_index) + 1)
         else:

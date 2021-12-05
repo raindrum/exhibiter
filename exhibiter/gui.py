@@ -285,7 +285,7 @@ class ExhibiterWidget(QtWidgets.QWidget):
                 )
             )
 
-        # update theGUI
+        # update the GUI
         self.exhibits_need_regen = False
         self.docx_save_btn.setEnabled(True)
         self.pdf_save_btn.setEnabled(True)

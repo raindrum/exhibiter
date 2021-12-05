@@ -32,7 +32,7 @@ The sections below give a bit more detail on these concepts. If you want an exam
 
 Every exhibit's filename (or folder name) must have a number or capital letter. For instance, `101` and `A` are both valid folder names, representing Exhibit 101 or Exhibit A, respectively.
 
-You may also give each exhibit a title, which will appear in the exhibit list. If the exhibit is a folder full of named documents, the title is optional. If the exhibit is a PDF or image, it *must* have a title.
+You may also give each exhibit a title. If an exhibit is a folder full of named documents, the title is optional. If the exhibit is a PDF or image, it *must* have a title.
 
 An exhibit has a title if, after the exhibit number, the filename has a period, space, and then some text. An example of a titled exhibit is `103. Party Communications`.
 
